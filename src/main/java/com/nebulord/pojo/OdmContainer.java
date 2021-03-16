@@ -7,9 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
-    String id;
-    String nickname;
-    String password;
-    String createtime;
+public class OdmContainer {
+    String containerName;
+    String containerId;
+    String userid;
 }

@@ -13,17 +13,22 @@ import java.io.*;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * fileuploader
+ *
+ * uploadPath以及tmpPath均不需要在最后加/
+ */
 public class FileuploadUtils {
-    private Model model;
 
     private HttpServletRequest request;
 
-    private String uploadPath = "F:/treedata_repo/";
+    private String uploadPath = "F:/treedata_repo";
 
-    private String tmpPath = "F:/treedata_repo/";
+    private String tmpPath = "F:/treedata_repo";
 
-    public FileuploadUtils(Model model, HttpServletRequest request, String uploadPath, String tmpPath) {
-        this.model = model;
+    private String uuidPath;
+
+    public FileuploadUtils(HttpServletRequest request, String uploadPath, String tmpPath) {
         this.request = request;
         this.uploadPath = uploadPath;
         this.tmpPath = tmpPath;
@@ -45,118 +50,134 @@ public class FileuploadUtils {
         this.tmpPath = tmpPath;
     }
 
-    public void setModel(Model model) {
-        this.model = model;
-    }
-
     public void setRequest(HttpServletRequest request) {
         this.request = request;
     }
 
+    /**
+     * 检测是否为一个文件上传的请求
+     * @return bool
+     */
     private Boolean hasFile(){
-        //如果没有文件
         if(!ServletFileUpload.isMultipartContent(request)){
-            System.out.println("不带文件");
-            model.addAttribute("msg", "无法上传图片,原因：无文件");
             return false;
         }
         return true;
     }
 
-    public String upload(){
-        //如果没有文件
+    /**
+     *
+     * @param uploadFile
+     * @param tmpFile
+     */
+    private void initPath(File uploadFile, File tmpFile){
+
+        System.out.println("上传根目录为：" + uploadPath);
+
+        //不存在上传根目录则创建
+        if(!uploadFile.exists()){
+            uploadFile.mkdir();
+            System.out.println(uploadPath + "创建成功");
+        }
+
+        System.out.println("临时文件目录为：" + tmpPath);
+
+        //不存在临时文件目录为则创建
+        if(!tmpFile.exists()){
+            tmpFile.mkdir();
+            System.out.println(tmpPath + "创建成功");
+        }
+
+    }
+
+    /**
+     *
+     * @param session
+     * @return
+     */
+    public String upload(HttpSession session){
+
+        //判断是否为文件上传请求
         if(!hasFile()){
             return "null";
         }
 
-        /**
-         * 这里getRealPath总是转至tomcat Temp文件夹，不是理想的保存位置
-         * 后期需要指定上传的位置
-         */
-        System.out.println("上传的根目录为: " + uploadPath);
-
-        //判断uploadpath是否存在，不存在则创建
         File uploadFile = new File(uploadPath);
-        if(!uploadFile.exists()){
-            uploadFile.mkdir();
-            System.out.println("WARNNING: 无" + uploadPath + "路径，但是已经创建成功");
-        }
-
-        //创建临时文件的保存路径
-        System.out.println("临时文件目录为: " + tmpPath);
-
-        //判断tmpPath是否存在，不存在则创建
         File tmpFile = new File(tmpPath);
-        if(!tmpFile.exists()){
-            tmpFile.mkdir();
-            System.out.println("WARNNING: 无" + tmpFile + "路径，但是已经创建成功");
-        }
+        //创建文件保存目录
+        initPath(uploadFile, tmpFile);
 
-        //创建DiskFileItemFactory,限制上传大小，设置上传路径
+        //DiskFileItemFactory
         DiskFileItemFactory factory = new DiskFileItemFactory();
-        //缓冲区100MB
-        factory.setSizeThreshold(1024*1024*100);
+        //设置缓冲区: 100MB，以及缓冲区路径
+        factory.setSizeThreshold(1024 * 1024 * 100);
         factory.setRepository(tmpFile);
 
         //ServletFileUpload
         ServletFileUpload upload = new ServletFileUpload(factory);
+        //设置监听
         upload.setProgressListener(new ProgressListener(){
             @Override
-            public void update(long ready, long all, int i){
+            public void update(long ready, long all, int i) {
                 float process = (float)ready / all;
-                request.getSession().removeAttribute("process");
-                request.getSession().setAttribute("process", "" + process);
-                System.out.println(ready + " / " + all);
+                //session.removeAttribute("process");
+                session.setAttribute("process", "" + process);
+                //System.out.println(process);
             }
         });
-
         //设置编码
         upload.setHeaderEncoding("UTF-8");
-        //设置单个文件的最大值
+        //设置单个文件最大值: 100MB
         upload.setFileSizeMax(1024*1024*100);
-        //设置总共能够上传的文件大小
+        //设置上传上限: 10GB
         upload.setSizeMax(1024*1024*1024*10);
-        String uuidPath = "";
-        try{
-            List<FileItem> fileItems = upload.parseRequest(request);
-            uuidPath = UUID.randomUUID().toString();
-            System.out.println("此次上传路径为：" + uploadPath + "/" + uuidPath);
-            System.out.println(fileItems.size());
-            for(FileItem fileItem : fileItems) {
-                //判断是普通表单还是带文件表单
-                if (fileItem.isFormField()) {
 
-                    //普通表单
-                    String name = fileItem.getFieldName();
-                    String value = fileItem.getString("UTF-8");
-                    System.out.println(name + ":" + value);
+        //设置本次上传uuid
+        uuidPath = UUID.randomUUID().toString();
+        //图片个数
+        int count = 0;
+
+        try{
+            //解析request
+            List<FileItem> fileItems = upload.parseRequest(request);
+            System.out.println(fileItems.size());
+            for(FileItem item : fileItems){
+                //判断FileItem是否包含表单
+                if(item.isFormField()){
+                    //此处为普通表单
+                    String value = item.getString("UTF-8");
+                    System.out.println("上传人: " + value);
                 }
-                else {
-                    //带文件表单
-                    String uploadFileName = fileItem.getName();
-                    System.out.println("全文件名: " + uploadFileName);
-                    if(uploadFileName.trim().equals("")||uploadFileName==null){
+                else{
+                    //此处为带文件表单
+                    //获取文件名
+                    String uploadFileName = item.getName();
+                    if(uploadFileName.trim().equals("") || uploadFileName == null){
                         continue;
                     }
-                    String fileName = uploadFileName.substring(uploadFileName.lastIndexOf("/") + 1);
-                    System.out.println("文件名: " + fileName);
-                    //获得上传文件的后缀
-                    String fileExtName = uploadFileName.substring(uploadFileName.lastIndexOf(".") + 1);
+                    String fileName = uploadFileName.substring(
+                            uploadFileName.lastIndexOf("/") + 1
+                    );
+                    String fileExtName = uploadFileName.substring(
+                            uploadFileName.lastIndexOf('.') + 1
+                    );
+                    if(!fileExtName.equals("JPG") && !fileExtName.equals("PNG") && !fileExtName.equals("png") && !fileExtName.equals("jpg")){
+                        //如果不为图片文件则掠过: png、jpg、PNG、JPG
+                        continue;
+                    }
 
-                    //设置存放地址
+                    //通过图片检查，则图片数量+1
+                    ++count;
                     String realPath = uploadPath + "/" + uuidPath;
-
-                    //不存在该文件夹则创建
                     File realPathFile = new File(realPath);
                     if(!realPathFile.exists()){
                         realPathFile.mkdir();
-                        System.out.println("已创建路径: " + realPath);
                     }
-                    System.out.println("图片保存在: " + realPath);
-                    InputStream inputStream = fileItem.getInputStream();
-                    //创建文件输出流
-                    FileOutputStream fos = new FileOutputStream(realPath + "/" + fileName);
 
+                    //获得输出流
+                    InputStream inputStream = item.getInputStream();
+                    //获得输出流
+                    FileOutputStream fos = new FileOutputStream(realPath + "/" + fileName);
                     byte[] buffer = new byte[1024*1024*100];
 
                     int len = 0;
@@ -166,18 +187,22 @@ public class FileuploadUtils {
 
                     fos.close();
                     inputStream.close();
-                    fileItem.delete();
+                    item.delete();
+
                 }
             }
-        }catch(FileUploadException | UnsupportedEncodingException e){
+
+        }
+        catch(Exception e){
             e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        }
+
+        if(count == 0){
+            return "null";
         }
 
         return uuidPath;
     }
+
 
 }

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" >
+    <title>index</title>
+    <script src="/js/jquery.min.js" type="text/javascript"></script>
+    <script>
+        function showProcess(){
+            $.ajax({
+                url: "/process",
+                success: function (data){
+                    console.log("process" + data);
+                    $("#process").html(data);
+                }
+            });
+        };
+        function upload(){
+            var intervalID = window.setInterval("showProcess()", 100);
+            var formdata = new FormData(document.getElementById("form"));
+            $.ajax({
+                url: "/upload",
+                type: "post",
+                data: formdata,
+                cache:false,
+                processData: false,
+                contentType: false,
+                success: function (data){
+                    console.log("upload ok");
+                    $.ajax({
+                        url: "/status",
+                        success: function (data){
+                            $("#status").html(data);
+                            window.clearInterval(intervalID);
+                        }
+                    });
+                },
+                error:function(e){
+                    alert("网络错误，请重试！！");
+                    window.clearInterval(intervalID);
+                }
+            });
+
+
+        }
+
+        function check(){
+            console.log($("#files").val())
+            console.log(new FormData(document.getElementById("form")))
+        }
+
+    </script>
+</head>
+<body>
+    <form id="form" method="post" enctype="multipart/form-data">
+        上传人：<input type="text" name="user"/><br/>
+        <input id = "files" type="file" name="file1" multiple="multiple"/>
+        <input type="button" value="submit" onclick="upload()"/>
+    </form>
+    <p>进度: <span id="process"></span></p>
+    <p>状态: <span id="status"></span></p>
+</body>
+</html>
