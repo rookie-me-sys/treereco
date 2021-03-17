@@ -25,11 +25,11 @@ public class FileuploadController {
         String uuid = fileUploadr.upload(request.getSession());
         //如果返回null字符串，则说明不带文件，在session中放置uploadStatus=null
         if(uuid.equals("null")){
-            request.getSession().setAttribute("uploadStatus", "null");
+            request.getSession().setAttribute("uploadStatus", "上传文件中存在非图片文件");
             return;
         }
         else{
-            request.getSession().setAttribute("uploadStatus", "ok");
+            request.getSession().setAttribute("uploadStatus", "上传成功");
         }
         System.out.println(uuid);
     }
