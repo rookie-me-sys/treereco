@@ -7,9 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
-    private String id;
-    private String nickname;
-    private String password;
-    private String createtime;
+public class Treerepo {
+    private String userid;
+    private String uuid;
 }

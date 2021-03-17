@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OdmContainer {
-    String containerName;
-    String containerId;
-    String userid;
+    private String containerName;
+    private String containerId;
+    private String userid;
+    private String status;
 }

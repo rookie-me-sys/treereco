@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nebulord.mapper.OdmContainerMapper">
+
+    <select id="getAllContainers" resultType="OdmContainer">
+        select * from odmcontainer
+    </select>
+
+    <select id="getContainerByUserid" parameterType="String" resultType="OdmContainer">
+        select * from odmcontainer where userid=#{userid}
+    </select>
+
+    <select id="getContainerByUsername" parameterType="String" resultMap="getByUsername">
+        select containerName, containerId, users.id uid, status
+        from odmcontainer, users
+        where users.id=odmcontainer.userid and users.nickname=#{userName}
+    </select>
+
+    <resultMap id="getByUsername" type="OdmContainer">
+        <result property="containerName" column="containerName"/>
+        <result property="containerId" column="containerId"/>
+        <result property="userid" column="uid"/>
+        <result property="status" column="status"/>
+    </resultMap>
+
+    <select id="getUserByContainerId" parameterType="String" resultType="String">
+        select userid from odmcontainer where containerId=#{id}
+    </select>
+
+    <select id="getUserByContainerName" parameterType="String" resultType="String">
+        select userid from odmcontainer where containerName=#{name}
+    </select>
+
+    <insert id="addContainer" parameterType="OdmContainer">
+        insert into odmcontainer(containerName, containerId, userid, status)
+        values(#{containerName}, #{containerId}, #{userid}, #{status})
+    </insert>
+
+    <update id="changeContainerStatus" parameterType="map">
+        update odmcontainer
+        set status=#{status}
+        where containerId=#{containerId}
+    </update>
+
+
+
+</mapper>

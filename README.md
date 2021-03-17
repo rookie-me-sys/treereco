@@ -20,18 +20,62 @@ Cesium是一个用于开发三维WebGIS客户端的开源JavaScript开发包。
 
 
 
+## 设计流程
 
+![image-20210317143059861](F:\IntellJWorkspace\version-01\README.assets\image-20210317143059861.png)
 
 ## 数据库
 
 数据库中表设计如下：
 
 - users	用户表
+	- id
+	- nickname
+	- password
+	- createtime
 - treerepo	用户所上传UAV图像的保存位置
+	- userid
+	- uuid
 - odmcontainer	用户所属的odm处理进程信息
 	- containerName
 	- containerId
+	- status
 - etc.
+
+
+
+## Mybatis+MySql
+
+### 链接
+
+`jdbc:mysql://localhost:3306/treereco?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC`
+
+### 功能
+
+**users**
+
+- 获得所有用户的信息
+- **根据userid获得用户**
+- **根据nickname获得用户**
+- 向users表添加新用户
+- 更改用户密码
+- 获取最大id
+
+**odmcontainer**
+
+- 查询所有容器
+- 根据用户id查询容器
+- 根据用户nickname查询容器    [joint query]
+- 根据容器id查询所属用户    [admin]
+- 根据容器名查询所属用户
+- **插入容器**（上传完成后容器名为uuid名）
+- **修改容器状态**
+
+**treerepo**
+
+- 根据用户查询所有uuid
+- **根据uuid查询用户**
+- **添加一条数据**（上传完成后将uuid）
 
 
 
@@ -53,6 +97,10 @@ Cesium是一个用于开发三维WebGIS客户端的开源JavaScript开发包。
 uuid也作为文件上传的位置，如上传根目录为`/user/data`则图片保存在`/user/data/[uuid]`
 
 同理，odm产生的obj文件等生成在输出根目录的`uuid`次级目录下。
+
+### 流程示意
+
+![image-20210317142939283](F:\IntellJWorkspace\version-01\README.assets\image-20210317142939283.png)
 
 ### 异常处理
 
