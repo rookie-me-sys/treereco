@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>container view</title>
+    <script src="/js/jquery.min.js" type="text/javascript"></script>
+    <script>
+        function StartorStop(){
+            $.ajax({
+                url: "/startstop",
+                data: {"containerName" : $("#selector").val()},
+                success: function (data){
+                    console.log(data);
+                }
+            })
+        }
+        function getInfo(){
+            $.ajax({
+                url: "/repoinfo",
+                success: function (data){
+                    console.log(data);
+                    //转为对象
+                    var container = JSON.parse(data);
+                    html = "<tr>" +
+                        "<th style=\"min-width: 100px\">用户id</th>" +
+                        "<th style=\"min-width: 100px\">uuid</th>" +
+                        "<th style=\"min-width: 100px\">container id</th>" +
+                        "<th style=\"min-width: 100px\">status</th>" +
+                        "</tr>";
+                    var cid;
+                    var status;
+                    for(let i = 0; i < container.uuid.length; i++){
+                        cid = container.containerId[i];
+                        status = container.status[i];
+                        if(cid == ""){
+                            cid="未创建";
+                        }
+                        if(status == ""){
+                            status="未创建";
+                        }
+                        html += "<tr>" +
+                            "<td style=\"min-width: 100px\">" + container.userId + "</td>" +
+                            "<td style=\"min-width: 100px\">" + container.uuid[i] + "</td>" +
+                            "<td style=\"min-width: 100px\">" + cid + "</td>" +
+                            "<td style=\"min-width: 100px\">" + status + "</td>" +
+                            "</tr>";
+                    }
+                    $("#table").html(html);
+
+                    var options;
+                    for(let i = 0; i < container.uuid.length; i++){
+                        options = "<option value='" + container.uuid[i] + "'>" +
+                            container.uuid[i] +
+                            "</option>";
+                    }
+                    $("#selector").html(options);
+                }
+            })
+        }
+    </script>
+    <script>
+        getInfo();
+    </script>
+
+</head>
+<body>
+    <table id="table" style="border:1px solid black"></table>
+
+    <select id="selector" name="list"></select>
+
+    <button onclick="StartorStop()">启用/停止</button>
+</body>
+</html>

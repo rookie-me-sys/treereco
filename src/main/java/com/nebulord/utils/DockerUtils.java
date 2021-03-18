@@ -43,12 +43,11 @@ public class DockerUtils {
     }
 
     /**
-     * @param client
      * @param containerName
      * @return
      * delete container by name
      */
-    public Boolean stopContainer(DockerClient client, String containerName){
+    public Boolean stopContainer(String containerName){
         //获得所有容器
         List<Container> list = client.listContainersCmd().exec();
         //遍历每一个容器
@@ -67,13 +66,11 @@ public class DockerUtils {
     }
 
     /**
-     *
-     * @param client
      * @param containerName
      * @return
      */
     @Deprecated
-    public Boolean removeContainer(DockerClient client, String containerName){
+    public Boolean removeContainer(String containerName){
         //获得所有容器
         List<Container> list = client.listContainersCmd().exec();
         //遍历每一个容器
@@ -92,12 +89,10 @@ public class DockerUtils {
     }
 
     /**
-     *
-     * @param client
      * @param containerName
      * @return
      */
-    public Boolean stopAndRemoveContainer(DockerClient client, String containerName){
+    public Boolean stopAndRemoveContainer(String containerName){
         //获得所有容器
         List<Container> list = client.listContainersCmd().exec();
         //遍历每一个容器
@@ -117,22 +112,62 @@ public class DockerUtils {
     }
 
     /**
-     *
-     * @param client
      * @param containerName
      * @return
      * 如果找不到容器则返回空字符串
      */
-    public String getContainerIdByName(DockerClient client, String containerName){
+    public String getContainerIdByName(String containerName){
+        //获得所有容器
+        List<Container> list = client.listContainersCmd().exec();
+        System.out.println(list.size());
+        //遍历每一个容器
+        for(Container container : list){
+            //遍历每一个容器下的容器名
+            for(String name : container.getNames()){
+                //如果容器的容器名==给出的名，返回id
+                System.out.println(name);
+                if(name.equals("/" + containerName)){
+                    return container.getId();
+                }
+            }
+        }
+        //找不到容器
+        return "";
+    }
+
+    /**
+     *
+     * @param id
+     * @return
+     */
+    public Boolean removeContainerById(String id){
+        try{
+            client.removeContainerCmd(id).exec();
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
+    }
+
+
+    /**
+     *
+     * @param containerName
+     * @return
+     */
+    public String getContainerStatusByName(String containerName){
         //获得所有容器
         List<Container> list = client.listContainersCmd().exec();
         //遍历每一个容器
         for(Container container : list){
             //遍历每一个容器下的容器名
             for(String name : container.getNames()){
-                //如果容器的容器名==给出的名，则删除该容器
+                //如果容器的容器名==给出的名，则获得容器status
                 if(name.equals("/" + containerName)){
-                    return container.getId();
+                    return container.getStatus();
                 }
             }
         }

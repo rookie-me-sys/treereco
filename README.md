@@ -138,8 +138,44 @@ docker控制使用以下组件：
 
 推荐用于不带`--rm`的容器
 
+**removeContainerById**
+
+根据容器id删除容器（很好用）：）
+
 ### 注意
 
 使用`listContainersCmd()`获得的Container对象下获得的name前包含一个斜杠`/`
 
 因此在遍历判断容器名之前应该加上左斜杠
+
+
+
+## ContainerStarter
+
+**runContainer**
+
+创建容器，需要传入uuid，作为容器名，以及作为路径的依据
+
+
+
+## Application.properties
+
+包含：
+
+- **文件上传路径配置**
+- **odm输出位置**
+
+
+
+## ContainerController
+
+**/repoinfo**
+
+使用json格式返回用户上传文件后，容器以及uuid的信息
+
+
+
+**/startstop**
+
+控制停止和启动
+

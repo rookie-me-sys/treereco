@@ -15,6 +15,8 @@ public class PageGuideConfig implements WebMvcConfigurer {
          * http://localhost:8080/
          */
         registry.addViewController("/").setViewName("index");
+        registry.addViewController("/index").setViewName("index");
+        registry.addViewController("/container").setViewName("container");
 
     }
 }

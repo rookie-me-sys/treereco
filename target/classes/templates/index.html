@@ -44,6 +44,15 @@
 
         }
 
+        function login(){
+            $.ajax({
+                url: "/login",
+                success: function (data){
+                    console.log("login");
+                }
+            });
+        }
+
         function check(){
             console.log($("#files").val())
             console.log(new FormData(document.getElementById("form")))
@@ -59,5 +68,7 @@
     </form>
     <p>进度: <span id="process"></span></p>
     <p>状态: <span id="status"></span></p>
+    <button type="button" onclick="login()">login</button>
+    <a href="/container">container</a>
 </body>
 </html>
