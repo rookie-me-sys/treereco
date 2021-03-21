@@ -46,11 +46,43 @@ public interface OdmContainerMapper {
     String getUserByContainerName(String name);
 
     /**
+     * 根据容器名获得容器id
+     * @param containerName
+     * @return
+     */
+    String getContainerIdByName(String containerName);
+
+    /**
+     * 根据容器id获得容器名
+     * @param containerId
+     * @return
+     */
+    String getContainerNameById(String containerId);
+
+    /**
      * 插入一条容器记录
      * @param container
      */
     void addContainer(OdmContainer container);
 
+    /**
+     * 查询当前容器名（即uuid）是否有容器实例
+     * @param containerName
+     * @return
+     */
+    int getContainerCount(String containerName);
+
+    /**
+     * 根据容器名删除容器数据
+     * @param containerName
+     */
+    void deleteContainerByName(String containerName);
+
+    /**
+     * 根据容器id删除容器数据
+     * @param containerId
+     */
+    void deleteContainerById(String containerId);
     /**
      * 修改容器状态
      * containerId-status

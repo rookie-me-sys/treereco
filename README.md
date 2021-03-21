@@ -142,11 +142,15 @@ docker控制使用以下组件：
 
 根据容器id删除容器（很好用）：）
 
+
+
 ### 注意
 
-使用`listContainersCmd()`获得的Container对象下获得的name前包含一个斜杠`/`
+- 使用`listContainersCmd()`获得的Container对象下获得的name前包含一个斜杠`/`
 
 因此在遍历判断容器名之前应该加上左斜杠
+
+- 由于docker容器操作的滞后性，所有停止类的容器操作最后需要加上判断是否已经停止的判断
 
 
 
@@ -155,6 +159,17 @@ docker控制使用以下组件：
 **runContainer**
 
 创建容器，需要传入uuid，作为容器名，以及作为路径的依据
+
+在执行`runtime.exec(exec)`后，需要循环调用`getContainerIdByName`直到能够取到返回的containerId为止，说明已经成功创建
+
+```java
+while(docker.getContainerIdByName(uuid).equals("")){
+    Thread.sleep(1000);
+    System.out.println("wait");
+}
+```
+
+
 
 
 
@@ -171,7 +186,21 @@ docker控制使用以下组件：
 
 **/repoinfo**
 
-使用json格式返回用户上传文件后，容器以及uuid的信息
+构建一个内部类ContainerInfo，用于填入该用户下每一个容器的信息，包含：
+
+- 容器uuid（名）
+- 用户id
+- 容器ID
+- 容器状态
+
+容器的id通过从docker中获取和mysql中获取的对比来决定最终id值
+
+由于docker容器停止后，docker-java将获取不到该容器的信息，因此不仅需要从docker中获取id也要在mysql中获取历史id，若在mysql中查询不到id，则说明容器从来都没有被创建过，id赋值为从docker中获取的id。
+
+若在mysql和docker中都存在id，则分为两种情况：
+
+- 容器停止了，docker中id为空，则id赋值为mysql中的历史id
+- 容器正在运行，取docker中id
 
 
 
@@ -179,3 +208,21 @@ docker控制使用以下组件：
 
 控制停止和启动
 
+通过判断是否能够获取到容器状态来判断是否存在该运行中容器
+
+在执行启动操作之前，为保证一组UAV数据只对应一个容器，先判断数据库中是否存在该名的容器，若有则删除该容器：
+
+- 删除docker下容器
+- 删除数据库容器
+
+停止
+
+
+
+
+
+### odm容器状态：
+
+1. ""=未创建
+2. 运行
+3. 停止，在数据库中存在id但是status返回空

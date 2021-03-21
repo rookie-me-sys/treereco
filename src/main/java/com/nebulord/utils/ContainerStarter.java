@@ -31,7 +31,7 @@ public class ContainerStarter {
      * 启动容器
      * @param uuid
      */
-    public void runContainer(String uuid) throws IOException {
+    public void runContainer(String uuid) throws IOException, InterruptedException {
 
         /**
          * 是否要加--rm有待争议:
@@ -50,10 +50,16 @@ public class ContainerStarter {
                 "--name " + uuid +
                 " opendronemap/odm";
 
-        System.out.println(exec);
-
         runtime.exec(exec);
-    }
 
+        DockerUtils docker = new DockerUtils();
+
+        //若为空字符串，则说明还未创建成功，应该循环到能够获取到id为止
+        while(docker.getContainerIdByName(uuid).equals("")){
+            Thread.sleep(1000);
+            System.out.println("wait");
+        }
+
+    }
 
 }

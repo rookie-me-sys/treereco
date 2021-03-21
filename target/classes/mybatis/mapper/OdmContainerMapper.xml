@@ -44,6 +44,24 @@
         where containerId=#{containerId}
     </update>
 
+    <select id="getContainerIdByName" parameterType="String" resultType="String">
+        select containerId from odmcontainer where containerName=#{containerName}
+    </select>
 
+    <select id="getContainerNameById" resultType="String" parameterType="String">
+        select containerName from odmcontainer where containerId=#{containerId}
+    </select>
+
+    <select id="getContainerCount" parameterType="String" resultType="int">
+        select count(*) from odmcontainer where containerName=#{containerName}
+    </select>
+
+    <delete id="deleteContainerByName" parameterType="String">
+        delete from odmcontainer where containerName=#{containerName}
+    </delete>
+
+    <delete id="deleteContainerById" parameterType="String">
+        delete from odmcontainer where containerId=#{containerId}
+    </delete>
 
 </mapper>

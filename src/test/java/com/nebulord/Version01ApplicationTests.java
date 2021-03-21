@@ -116,7 +116,7 @@ class Version01ApplicationTests {
      * ContainerStarter test
      */
     @Test
-    void startContainer() throws IOException {
+    void startContainer() throws IOException, InterruptedException {
         ContainerStarter starter = new ContainerStarter();
         DockerUtils docker = new DockerUtils();
 
@@ -126,6 +126,58 @@ class Version01ApplicationTests {
 
         System.out.println("id: " + id);
 
+    }
+
+    @Test
+    void getContainerId() throws IOException {
+
+        DockerUtils docker = new DockerUtils();
+
+        String id = docker.getContainerIdByName("cdd4e3ed-b56d-41fa-aa53-ce46537fb342");
+
+        System.out.println("id: " + id);
+
+    }
+
+    @Test
+    void stopAndRemove() throws IOException, InterruptedException {
+
+        DockerUtils docker = new DockerUtils();
+
+        docker.stopAndRemoveContainer("cdd4e3ed-b56d-41fa-aa53-ce46537fb342");
+
+    }
+
+    @Test
+    void getContainerIdSQL(){
+        String id = containermapper.getContainerIdByName("1");
+
+        if(id == null){
+            System.out.println("null");
+        }
+        else{
+            System.out.println(id);
+        }
+    }
+
+    @Test
+    void getCount(){
+        System.out.println(containermapper.getContainerIdByName("cdd4e3ed-b56d-41fa-aa53-ce46537fb342"));
+
+        System.out.println(containermapper.getContainerCount("cdd4e3ed-b56d-41fa-aa53-ce46537fb342"));
+    }
+
+    @Test
+    void deleteTest() throws JsonProcessingException {
+        DockerUtils docker = new DockerUtils();
+        int count = containermapper.getContainerCount("cdd4e3ed-b56d-41fa-aa53-ce46537fb342");
+
+        if(count != 0){
+            String id = containermapper.getContainerIdByName("cdd4e3ed-b56d-41fa-aa53-ce46537fb342");
+            docker.removeContainerById(id);
+            containermapper.deleteContainerByName("cdd4e3ed-b56d-41fa-aa53-ce46537fb342");
+
+        }
     }
 
 
